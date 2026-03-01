@@ -69,6 +69,14 @@ table td {
   font-weight: bold;
 }
 
+.carregarMais {
+  color: #fff;
+  margin: 14px 0;
+  padding: 8px 24px;
+  background-color: #30beff;
+  border-radius: 8px;
+}
+
 /* Responsive */
 
 @media (max-width: 600px) {

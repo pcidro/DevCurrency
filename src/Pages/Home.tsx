@@ -1,13 +1,76 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import type { SubmitEvent } from "react";
 import styles from "../css/home.module.css";
 import { BsSearch } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+interface ApiResponse {
+  data: bitCoins[];
+  timestamp: number;
+}
+
+interface bitCoins {
+  id: string;
+  rank: string;
+  symbol: string;
+  name: string;
+  supply: string;
+  maxSupply: string;
+  marketCapUsd: string;
+  volumeUsd24Hr: string;
+  priceUsd: string;
+  changePercent24Hr: string;
+  vwap24Hr: string;
+  explorer: string;
+}
 
 const Home = () => {
+  const [input, setInput] = useState("");
+  const [coins, setCoins] = useState<bitCoins[] | null>(null);
+  const apiKey =
+    "006cfddc56db5cb49f34d9698643f972e276cbe99adcdda4f387ea4017559c62";
+
+  useEffect(() => {
+    async function getData() {
+      const res = await fetch(
+        `https://rest.coincap.io/v3/assets?limit=10&offset=0&apiKey=${apiKey}`,
+      );
+      const data: ApiResponse = await res.json();
+      const coinsData = data.data;
+      const price = Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
+      const formatedResult = coinsData.map((coin) => {
+        const formated = {
+          ...coin,
+          formatedPrice: price.format(Number(coin.priceUsd)),
+        };
+        return formated;
+      });
+      setCoins(formatedResult);
+    }
+    getData();
+  }, []);
+  const navigate = useNavigate();
+
+  function handleSubmit(e: SubmitEvent) {
+    e.preventDefault();
+    if (input === "") return;
+
+    navigate(`/detail/${input}`);
+  }
+
+  function handleGetMore() {}
   return (
     <main className={styles.container}>
-      <form className={styles.form}>
-        <input type="text" placeholder="Digite o nome da moeda..." />
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <input
+          type="text"
+          placeholder="Digite o nome da moeda..."
+          value={input}
+          onChange={({ target }) => setInput(target.value)}
+        />
         <button type="submit">
           <BsSearch size={30} color="#fff" />
         </button>
@@ -49,6 +112,9 @@ const Home = () => {
           </tr>
         </tbody>
       </table>
+      <button onClick={handleGetMore} className={styles.carregarMais}>
+        Carregar mais
+      </button>
     </main>
   );
 };
