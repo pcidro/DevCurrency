@@ -29,14 +29,15 @@ interface bitCoins {
 
 const Home = () => {
   const [input, setInput] = useState("");
-  const [coins, setCoins] = useState<bitCoins[] | null>(null);
+  const [coins, setCoins] = useState<bitCoins[]>([]);
+  const [offset, setOffSet] = useState(0);
   const apiKey =
     "006cfddc56db5cb49f34d9698643f972e276cbe99adcdda4f387ea4017559c62";
 
   useEffect(() => {
     async function getData() {
       const res = await fetch(
-        `https://rest.coincap.io/v3/assets?limit=10&offset=0&apiKey=${apiKey}`,
+        `https://rest.coincap.io/v3/assets?limit=10&offset=${offset}&apiKey=${apiKey}`,
       );
       const data: ApiResponse = await res.json();
       const coinsData = data.data;
@@ -59,10 +60,11 @@ const Home = () => {
         };
         return formated;
       });
-      setCoins(formatedResult);
+      const listCoins = [...coins, ...formatedResult];
+      setCoins(listCoins);
     }
     getData();
-  }, []);
+  }, [offset]);
   const navigate = useNavigate();
 
   function handleSubmit(e: SubmitEvent) {
@@ -72,7 +74,13 @@ const Home = () => {
     navigate(`/detail/${input}`);
   }
 
-  function handleGetMore() {}
+  function handleGetMore() {
+    if (offset === 0) {
+      setOffSet(10);
+      return;
+    }
+    setOffSet(offset + 10);
+  }
   if (coins !== null)
     return (
       <main className={styles.container}>
