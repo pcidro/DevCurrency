@@ -69,7 +69,15 @@ const Home = () => {
 
   function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
-    if (input === "") return;
+    const coinExists = coins.find((coin) =>
+      coin.name.toLowerCase().includes(input.trim().toLowerCase()),
+    );
+
+    if (!coinExists) {
+      alert("Moeda não localizada");
+      setInput("");
+      return;
+    }
 
     navigate(`/detail/${input}`);
   }
