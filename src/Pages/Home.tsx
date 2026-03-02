@@ -22,6 +22,9 @@ interface bitCoins {
   changePercent24Hr: string;
   vwap24Hr: string;
   explorer: string;
+  formatedPrice?: string;
+  formatedMarket?: string;
+  formatedVolume?: string;
 }
 
 const Home = () => {
@@ -41,10 +44,18 @@ const Home = () => {
         style: "currency",
         currency: "USD",
       });
+
+      const priceCompact = Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        notation: "compact",
+      });
       const formatedResult = coinsData.map((coin) => {
         const formated = {
           ...coin,
           formatedPrice: price.format(Number(coin.priceUsd)),
+          formatedMarket: priceCompact.format(Number(coin.marketCapUsd)),
+          formatedVolume: priceCompact.format(Number(coin.volumeUsd24Hr)),
         };
         return formated;
       });
@@ -62,61 +73,75 @@ const Home = () => {
   }
 
   function handleGetMore() {}
-  return (
-    <main className={styles.container}>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <input
-          type="text"
-          placeholder="Digite o nome da moeda..."
-          value={input}
-          onChange={({ target }) => setInput(target.value)}
-        />
-        <button type="submit">
-          <BsSearch size={30} color="#fff" />
+  if (coins !== null)
+    return (
+      <main className={styles.container}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <input
+            type="text"
+            placeholder="Digite o nome da moeda..."
+            value={input}
+            onChange={({ target }) => setInput(target.value)}
+          />
+          <button type="submit">
+            <BsSearch size={30} color="#fff" />
+          </button>
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Moeda</th>
+              <th scope="col">Valor de mercado</th>
+              <th scope="col">Preço</th>
+              <th scope="col">Volume</th>
+              <th scope="col">Mudança 24h</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            {coins.length > 0 &&
+              coins.map((coin) => (
+                <tr key={coin.id} className={styles.tr}>
+                  <td data-label="Moeda" className={styles.tdLabel}>
+                    <div className={styles.name}>
+                      <img
+                        className={styles.logo}
+                        src={`https://assets.coincap.io/assets/icons/${coin.symbol.toLowerCase()}@2x.png`}
+                      />
+                      <Link to={`/detail/${coin.id}`}>
+                        <span>{coin.name} | </span>
+                        {coin.symbol}
+                      </Link>
+                    </div>
+                  </td>
+                  <td data-label="valor Mercado" className={styles.tdLabel}>
+                    {coin.formatedMarket}
+                  </td>
+                  <td data-label="Preco" className={styles.tdLabel}>
+                    {coin.formatedPrice}
+                  </td>
+                  <td data-label="Volume" className={styles.tdLabel}>
+                    {coin.formatedVolume}
+                  </td>
+
+                  <td
+                    data-label="Mudança 24h"
+                    className={
+                      Number(coin.changePercent24Hr) > 0
+                        ? styles.tdProfit
+                        : styles.tdLoss
+                    }
+                  >
+                    <span>{Number(coin.changePercent24Hr).toFixed(3)}</span>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+        <button onClick={handleGetMore} className={styles.carregarMais}>
+          Carregar mais
         </button>
-      </form>
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Moeda</th>
-            <th scope="col">Valor de mercado</th>
-            <th scope="col">Preço</th>
-            <th scope="col">Volume</th>
-            <th scope="col">Mudança 24h</th>
-          </tr>
-        </thead>
-        <tbody id="tbody">
-          <tr className={styles.tr}>
-            <td data-label="Moeda" className={styles.tdLabel}>
-              <div className={styles.name}>
-                <Link to={"/detail/bitcoin"}>
-                  <span>Bitcoin</span>|BTC
-                </Link>
-              </div>
-            </td>
-            <td data-label="valor Mercado" className={styles.tdLabel}>
-              1T
-            </td>
-            <td data-label="Preco" className={styles.tdLabel}>
-              8000
-            </td>
-            <td data-label="Volume" className={styles.tdLabel}>
-              2b
-            </td>
-            <td data-label="Volume" className={styles.tdLabel}>
-              2b
-            </td>
-            <td data-label="Mudança 24h" className={styles.tdProfit}>
-              <span>1.20</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <button onClick={handleGetMore} className={styles.carregarMais}>
-        Carregar mais
-      </button>
-    </main>
-  );
+      </main>
+    );
 };
 
 export default Home;
